@@ -8,6 +8,7 @@ import java.nio.charset.Charset
 import java.time.Year
 import kotlin.math.abs
 import kotlin.math.*
+import kotlinx.coroutines.*
 
 data class CarsCSV (
     val Car_Name: String, //useless
@@ -44,21 +45,42 @@ fun readCsv(inputStream: InputStream): List<CarsCSV> {
         }.toList()
 }
 
+fun distance(knnList: List<CarsCSV>, Car_Name: String, year: Year, Selling_Price: Double, Present_Price: Double,
+             Kms_Driven: Int, Fuel_Type: String, k: Int) : MutableList<Pair<Double, CarsCSV>> {
+    var distanceList = mutableListOf<Pair<Double, CarsCSV>>()
+    runBlocking {
+        knnList.forEach {
+            launch {
+                if(it.Fuel_Type==Fuel_Type){
+                    distanceList.add(Pair(((it.year.toString().toDouble() - year.toString().toDouble()).pow(2.0) +
+                            ((it.Present_Price - Present_Price)/1.5).pow(2.0) + ((it.Selling_Price -
+                            Selling_Price)*4.5).pow
+                        (2.0)
+                            + ((it.Kms_Driven.toDouble() - Kms_Driven.toDouble())/15000).pow(2.0)).pow(1 / 2.0),
+                        it))
+                }
+            }
+        }
+    }
+    return distanceList
+}
+
 fun knn(knnList: List<CarsCSV>, Car_Name: String, year: Year, Selling_Price: Double, Present_Price: Double,
         Kms_Driven: Int, Fuel_Type: String, k: Int):Double{
 //uzima zapis, mjeri sve udaljenosti i sortira, ispis prvih k sortiranih
     //izracunat udaljenost od svake tocke
     var distance:Double=0.0
-    var distanceList = mutableListOf<Pair<Double, CarsCSV>>()
-    for(i in 0..300){
-        if(knnList[i].Fuel_Type==Fuel_Type){
-        distanceList.add(Pair(((knnList[i].year.toString().toDouble() - year.toString().toDouble()).pow(2.0) +
-        ((knnList[i].Present_Price - Present_Price)/1.5).pow(2.0) + ((knnList[i].Selling_Price - Selling_Price)*4.5).pow
-            (2.0)
-        + ((knnList[i].Kms_Driven.toDouble() - Kms_Driven.toDouble())/15000).pow(2.0)).pow(1 / 2.0), knnList[i]))
-        }
-        continue //ako nije isti tip goriva, preskace petlju
-    }
+    var distanceList = distance(knnList, Car_Name, year, Selling_Price, Present_Price, Kms_Driven, Fuel_Type, k)
+
+//    for(i in 0..300){
+//        if(knnList[i].Fuel_Type==Fuel_Type){
+//        distanceList.add(Pair(((knnList[i].year.toString().toDouble() - year.toString().toDouble()).pow(2.0) +
+//        ((knnList[i].Present_Price - Present_Price)/1.5).pow(2.0) + ((knnList[i].Selling_Price - Selling_Price)*4.5).pow
+//            (2.0)
+//        + ((knnList[i].Kms_Driven.toDouble() - Kms_Driven.toDouble())/15000).pow(2.0)).pow(1 / 2.0), knnList[i]))
+//        }
+//        continue //ako nije isti tip goriva, preskace petlju
+//    }
 
     //sortirat
     distanceList.sortBy { it.first }
