@@ -72,16 +72,6 @@ fun knn(knnList: List<CarsCSV>, Car_Name: String, year: Year, Selling_Price: Dou
     var distance:Double=0.0
     var distanceList = distance(knnList, Car_Name, year, Selling_Price, Present_Price, Kms_Driven, Fuel_Type, k)
 
-//    for(i in 0..300){
-//        if(knnList[i].Fuel_Type==Fuel_Type){
-//        distanceList.add(Pair(((knnList[i].year.toString().toDouble() - year.toString().toDouble()).pow(2.0) +
-//        ((knnList[i].Present_Price - Present_Price)/1.5).pow(2.0) + ((knnList[i].Selling_Price - Selling_Price)*4.5).pow
-//            (2.0)
-//        + ((knnList[i].Kms_Driven.toDouble() - Kms_Driven.toDouble())/15000).pow(2.0)).pow(1 / 2.0), knnList[i]))
-//        }
-//        continue //ako nije isti tip goriva, preskace petlju
-//    }
-
     //sortirat
     distanceList.sortBy { it.first }
 
